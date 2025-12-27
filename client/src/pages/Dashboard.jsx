@@ -61,7 +61,7 @@ export default function Dashboard() {
     (req) => req.priority === "High"
   ).length;
 
-  const totalTeams = 5; // temporary static value
+  const totalTeams = 15; // temporary static value
   const assignedTeams = maintenanceRequests.filter(
     (req) => req.technician
   ).length;

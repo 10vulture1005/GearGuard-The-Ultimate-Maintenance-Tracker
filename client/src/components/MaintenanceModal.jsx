@@ -130,14 +130,21 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDa
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
+      
+      // Sanitize payload: Mongoose throws CastError if ObjectId fields are empty strings
+      const payload = { ...formData };
+      if (!payload.equipment) payload.equipment = null;
+      if (!payload.workCentre) payload.workCentre = null;
+      if (!payload.maintenanceTeam) payload.maintenanceTeam = null;
+
       if (requestToEdit) {
         // Update existing
-        await axios.put(`${import.meta.env.VITE_API_URL}/maintenance/update/${requestToEdit._id}`, formData, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/maintenance/update/${requestToEdit._id}`, payload, {
             headers: { Authorization: `Bearer ${token}` }
         });
       } else {
         // Create new
-        await axios.post(`${import.meta.env.VITE_API_URL}/maintenance/create`, formData, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/maintenance/create`, payload, {
             headers: { Authorization: `Bearer ${token}` }
          });
       }
