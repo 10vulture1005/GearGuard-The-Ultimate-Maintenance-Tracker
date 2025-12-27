@@ -12,18 +12,16 @@ export default function ForgotPassword() {
     setError('');
 
     try {
-      const { data } = await axios.post(
+      await axios.post(
         'http://localhost:5000/auth/forgot-password',
         { email },
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      // Option 2: auto redirect with token
-      if (data.resetToken) {
-        navigate(`/reset-password?token=${data.resetToken}`);
-      }
+      // Navigate to ResetPassword page with email in state
+      navigate('/reset-password', { state: { email } });
     } catch (err) {
-      setError('Something went wrong');
+      setError(err.response?.data?.message || 'Something went wrong');
     }
   };
 
@@ -57,7 +55,7 @@ export default function ForgotPassword() {
             type="submit"
             className="w-full rounded-lg bg-black py-3 font-bold text-white"
           >
-            SEND RESET LINK
+            SEND OTP
           </button>
         </form>
 

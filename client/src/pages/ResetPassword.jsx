@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function ResetPassword() {
-  const token = new URLSearchParams(window.location.search).get('token');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const [email, setEmail] = useState(location.state?.email || '');
+  const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +18,7 @@ export default function ResetPassword() {
     try {
       await axios.post(
         'http://localhost:5000/auth/reset-password',
-        { token, newPassword: password },
+        { email, otp, newPassword: password },
         { headers: { 'Content-Type': 'application/json' } }
       );
 
@@ -39,6 +42,28 @@ export default function ResetPassword() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold mb-2">EMAIL</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border border-black p-3"
+              placeholder="name@example.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-2">OTP</label>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full rounded-lg border border-black p-3"
+              placeholder="Enter 6-digit OTP"
+              required
+            />
+          </div>
           <div>
             <label className="block text-sm font-bold mb-2">
               NEW PASSWORD
