@@ -3,7 +3,10 @@ import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 
+import { useData } from '../context/DataContext';
+
 const Equipment = () => {
+  const { equipment: initialData } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -15,13 +18,6 @@ const Equipment = () => {
     { header: 'Technician', accessor: 'technician', width: '15%' },
     { header: 'Equipment Category', accessor: 'category', width: '10%' },
     { header: 'Company', accessor: 'company', width: '10%' },
-  ];
-
-  const initialData = [
-    { name: 'Samsung Monitor 15"', employee: 'Tejas Modi', department: 'Admin', serialNumber: 'MT/125/22778837', technician: 'Mitchell Admin', category: 'Monitors', company: 'My Company (San Francisco)' },
-    { name: 'Acer Laptop', employee: 'Bhaumik P', department: 'Technician', serialNumber: 'MT/122/11112222', technician: 'Marc Demo', category: 'Computers', company: 'My Company (San Francisco)' },
-    { name: 'HP Printer', employee: 'John Doe', department: 'Sales', serialNumber: 'MT/123/44556677', technician: 'Mitchell Admin', category: 'Printers', company: 'My Company (San Francisco)' },
-    { name: 'Dell Desktop', employee: 'Jane Smith', department: 'IT', serialNumber: 'MT/124/99887766', technician: 'Marc Demo', category: 'Computers', company: 'My Company (San Francisco)' },
   ];
 
   const [activeFilter, setActiveFilter] = useState(null);

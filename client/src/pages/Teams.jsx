@@ -3,7 +3,10 @@ import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 
+import { useData } from '../context/DataContext';
+
 const Teams = () => {
+  const { teams: initialData } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -11,12 +14,6 @@ const Teams = () => {
     { header: 'Team Name', accessor: 'name', width: '30%' },
     { header: 'Team Members', accessor: 'members', width: '40%' },
     { header: 'Company', accessor: 'company', width: '30%' },
-  ];
-
-  const initialData = [
-    { name: 'Internal Maintenance', members: 'Anna Baker', company: 'My Company (San Francisco)' },
-    { name: 'Astrology', members: 'Marc Demo', company: 'My Company (San Francisco)' },
-    { name: 'Subcontractor', members: 'Maggie Davidson', company: 'My Company (San Francisco)' },
   ];
 
   const [activeFilter, setActiveFilter] = useState(null);

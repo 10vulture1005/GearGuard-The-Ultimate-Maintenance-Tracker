@@ -1,54 +1,26 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MaintenanceModal from '../components/MaintenanceModal.jsx';
 import ViewEditMaintenanceModal from '../components/ViewEditMaintenanceModal.jsx';
+import { useData } from '../context/DataContext';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const { user, maintenanceRequests, loading, refreshData, logout } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
-  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const navigate = useNavigate();
 
-
-  const fetchData = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      const [profileRes, maintenanceRes] = await Promise.all([
-        axios.get('http://localhost:5000/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/maintenance/all', { headers: { Authorization: `Bearer ${token}` } })
-      ]);
-      setUser(profileRes.data);
-      setMaintenanceRequests(maintenanceRes.data);
-    } catch (err) {
-      console.error(err);
-      if (err.response && err.response.status === 401) {
-         localStorage.removeItem('token');
-         navigate('/login');
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [navigate]);
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
 
   const handleRefresh = () => {
-    fetchData();
+    refreshData();
   };
 
-  if (!user) return <div className="flex min-h-screen items-center justify-center font-bold text-2xl">LOADING...</div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center font-bold text-2xl">LOADING...</div>;
+  if (!user) return <div className="flex min-h-screen items-center justify-center font-bold text-2xl">Please log in.</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

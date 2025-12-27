@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 
-export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
+export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDate }) {
   const [formData, setFormData] = useState({
     subject: '',
     // createdBy: '', // Handled by backend
@@ -11,7 +12,7 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
     maintenanceType: 'Corrective',
     team: '',
     technician: '',
-    scheduledDate: '',
+    scheduledDate: initialDate ? moment(initialDate).format('YYYY-MM-DDTHH:mm') : '',
     durationHours: '',
     priority: 'Medium',
     company: '',
@@ -22,7 +23,15 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
 
   const [activeTab, setActiveTab] = useState('notes');
 
-  // if (!isOpen) return null; // Removed for animation
+  // Update scheduledDate when initialDate changes or modal opens
+  React.useEffect(() => {
+    if (isOpen && initialDate) {
+      setFormData(prev => ({
+        ...prev,
+        scheduledDate: moment(initialDate).format('YYYY-MM-DDTHH:mm')
+      }));
+    }
+  }, [isOpen, initialDate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
