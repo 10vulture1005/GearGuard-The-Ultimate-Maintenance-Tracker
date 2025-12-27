@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-white text-black;
+  }
+}
+
+/* Custom styles for that ultra-minimal look if needed, but Tailwind utilities should suffice */
