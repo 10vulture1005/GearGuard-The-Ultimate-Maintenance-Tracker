@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Layout = ({ children }) => {
   const location = useLocation();
   const navItems = [
+    { path: '/dashboard', label: 'Dashboard' },
     { path: '/equipment', label: 'Equipment' },
     { path: '/teams', label: 'Teams' },
     { path: '/equipment-category', label: 'Categories' },
