@@ -4,7 +4,7 @@ import axios from 'axios';
 export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
   const [formData, setFormData] = useState({
     subject: '',
-    createdBy: '',
+    // createdBy: '', // Handled by backend
     maintenanceFor: '',
     equipment: { name: '', id: '', category: '' },
     requestDate: new Date().toISOString().split('T')[0],
@@ -75,16 +75,12 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
                 <input type="text" name="subject" value={formData.subject} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" required />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                   <label className="block text-xs font-bold uppercase mb-1">Created By</label>
-                   <input type="text" name="createdBy" value={formData.createdBy} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" required />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                     <label className="block text-xs font-bold uppercase mb-1">Date</label>
+                     <input type="date" name="requestDate" value={formData.requestDate} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" required />
+                  </div>
                 </div>
-                <div>
-                   <label className="block text-xs font-bold uppercase mb-1">Date</label>
-                   <input type="date" name="requestDate" value={formData.requestDate} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" required />
-                </div>
-              </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase mb-1">Maintenance For</label>
