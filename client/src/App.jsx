@@ -4,6 +4,8 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
 import Equipment from './pages/Equipment';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Teams from './pages/Teams';
 import EquipmentCategory from './pages/EquipmentCategory';
 import WorkCentre from './pages/WorkCentre';
@@ -20,6 +22,8 @@ function App() {
         <Route path="/teams" element={<Layout><Teams /></Layout>} />
         <Route path="/equipment-category" element={<Layout><EquipmentCategory /></Layout>} />
         <Route path="/work-centres" element={<Layout><WorkCentre /></Layout>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -77,6 +77,66 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// POST /auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Important: don't reveal if user exists
+    if (!user) {
+      return res.json({ message: 'If email exists, reset link sent' });
+    }
+
+    const resetToken = jwt.sign(
+      { email: user.email },
+      JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+
+    // DEV MODE: return token so frontend can redirect
+    res.json({
+      message: 'Reset token generated',
+      resetToken
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and password required' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.updateOne(
+      { email: decoded.email },
+      { password: hashedPassword }
+    );
+
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ message: 'Invalid or expired token' });
+  }
+});
+
+
+
 // GET /auth/profile (Protected)
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
@@ -96,5 +156,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+
+
 
 export default router;
