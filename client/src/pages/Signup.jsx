@@ -17,7 +17,7 @@ export default function Signup() {
       return;
     }
     try {
-      const { data } = await axios.post('http://localhost:5000/auth/signup', { name, email, password }, {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, { name, email, password }, {
         headers: {
           'Content-Type': 'application/json',
         },

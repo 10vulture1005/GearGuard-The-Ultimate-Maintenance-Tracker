@@ -59,7 +59,7 @@ const Equipment = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/equipment');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/equipment`);
       setData(response.data);
     } catch (error) {
       console.error('Error fetching equipment:', error);
@@ -71,9 +71,9 @@ const Equipment = () => {
   const fetchDropdowns = async () => {
     try {
       const [teamRes, catRes, userRes] = await Promise.all([
-        axios.get('http://localhost:5000/teams'),
-        axios.get('http://localhost:5000/equipment-categories'),
-        axios.get('http://localhost:5000/auth/users') // Assuming this endpoint exists, or we might need to create it
+        axios.get(`${import.meta.env.VITE_API_URL}/teams`),
+        axios.get(`${import.meta.env.VITE_API_URL}/equipment-categories`),
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/users`) // Assuming this endpoint exists, or we might need to create it
       ]);
       setTeams(teamRes.data);
       setCategories(catRes.data);
@@ -95,9 +95,9 @@ const Equipment = () => {
     e.preventDefault();
     try {
       if (selectedItem) {
-         await axios.put(`http://localhost:5000/equipment/update/${selectedItem._id}`, formData);
+         await axios.put(`${import.meta.env.VITE_API_URL}/equipment/update/${selectedItem._id}`, formData);
       } else {
-         await axios.post('http://localhost:5000/equipment/create', formData);
+         await axios.post(`${import.meta.env.VITE_API_URL}/equipment/create`, formData);
       }
       setIsModalOpen(false);
       fetchData();
@@ -110,9 +110,10 @@ const Equipment = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this equipment?')) return;
     try {
-      await axios.delete(`http://localhost:5000/equipment/delete/${selectedItem._id}`);
-      setIsModalOpen(false);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/equipment/delete/${selectedItem._id}`);
       fetchData();
+      setSelectedItem(null);
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Error deleting equipment:', error);
       alert('Failed to delete equipment');

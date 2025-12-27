@@ -19,10 +19,10 @@ export default function Dashboard() {
 
     try {
       const [profileRes, maintenanceRes] = await Promise.all([
-        axios.get("http://localhost:5000/auth/profile", {
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:5000/maintenance/all", {
+        axios.get(`${import.meta.env.VITE_API_URL}/maintenance/all`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

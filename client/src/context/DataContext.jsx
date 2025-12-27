@@ -32,8 +32,8 @@ export const DataProvider = ({ children }) => {
     try {
       setLoading(true);
       const [profileRes, maintenanceRes] = await Promise.all([
-        axios.get('http://localhost:5000/auth/profile', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5000/maintenance/all', { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/profile`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${import.meta.env.VITE_API_URL}/maintenance/all`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
       setUser(profileRes.data);
       setMaintenanceRequests(maintenanceRes.data);

@@ -41,7 +41,7 @@ const Teams = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/teams');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/teams`);
       setData(response.data);
     } catch (error) {
       console.error('Error fetching teams:', error);
@@ -52,7 +52,7 @@ const Teams = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/auth/users');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/users`);
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -72,9 +72,9 @@ const Teams = () => {
     e.preventDefault();
     try {
       if (selectedItem) {
-          await axios.put(`http://localhost:5000/teams/update/${selectedItem._id}`, formData);
+          await axios.put(`${import.meta.env.VITE_API_URL}/teams/update/${selectedItem._id}`, formData);
       } else {
-          await axios.post('http://localhost:5000/teams/create', formData);
+          await axios.post(`${import.meta.env.VITE_API_URL}/teams/create`, formData);
       }
       setIsModalOpen(false);
       fetchData();
@@ -87,7 +87,7 @@ const Teams = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this team?')) return;
     try {
-        await axios.delete(`http://localhost:5000/teams/delete/${selectedItem._id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/teams/delete/${selectedItem._id}`);
         setIsModalOpen(false);
         fetchData();
     } catch (error) {

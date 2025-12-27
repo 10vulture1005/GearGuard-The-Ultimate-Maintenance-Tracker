@@ -40,9 +40,9 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDa
       const fetchData = async () => {
         try {
           const [eqRes, teamRes, wcRes] = await Promise.all([
-            axios.get('http://localhost:5000/equipment'),
-            axios.get('http://localhost:5000/teams'),
-            axios.get('http://localhost:5000/work-centres')
+            axios.get(`${import.meta.env.VITE_API_URL}/equipment`),
+            axios.get(`${import.meta.env.VITE_API_URL}/teams`),
+            axios.get(`${import.meta.env.VITE_API_URL}/work-centres`)
           ]);
           setEquipmentOptions(eqRes.data);
           setTeamOptions(teamRes.data);
@@ -132,12 +132,12 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDa
       const token = localStorage.getItem('token');
       if (requestToEdit) {
         // Update existing
-        await axios.put(`http://localhost:5000/maintenance/update/${requestToEdit._id}`, formData, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/maintenance/update/${requestToEdit._id}`, formData, {
             headers: { Authorization: `Bearer ${token}` }
         });
       } else {
         // Create new
-        await axios.post('http://localhost:5000/maintenance/create', formData, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/maintenance/create`, formData, {
             headers: { Authorization: `Bearer ${token}` }
          });
       }
@@ -153,7 +153,7 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDa
     if (!window.confirm('Are you sure you want to delete this request?')) return;
     try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/maintenance/delete/${requestToEdit._id}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/maintenance/delete/${requestToEdit._id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         onRefresh();
