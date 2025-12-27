@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+function parseJwt (token) {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        return null;
+    }
+}
+
 export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, onRefresh }) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(null);
   const [activeTab, setActiveTab] = useState('notes');
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        const decoded = parseJwt(token);
+        setCurrentUser(decoded);
+    }
+  }, []);
 
   // Fetch data when modal opens or ID changes
   useEffect(() => {
@@ -115,7 +132,9 @@ export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, o
                   <div>
                      <label className="block text-xs font-bold uppercase mb-1">Created By</label>
                      {isEditing ? (
-                        <input type="text" name="createdBy" value={formData.createdBy} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" />
+                        <div className="w-full border-2 border-gray-300 rounded-lg p-2 bg-gray-100 text-gray-500 font-medium cursor-not-allowed">
+                            {formData.createdBy}
+                        </div>
                      ) : (
                         <div className="p-2 border-2 border-transparent border-b-gray-200 font-medium">{formData.createdBy}</div>
                      )}
@@ -303,14 +322,21 @@ export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, o
 
             {/* Footer */}
             <div className="flex items-center justify-between border-t-2 border-black pt-6">
-               <button type="button" onClick={handleDelete} className="px-4 py-2 font-bold uppercase text-red-600 border-2 border-transparent hover:border-red-600 rounded-lg transition-all text-sm">Delete Request</button>
+               {(formData.createdById && currentUser && formData.createdById === currentUser.userId) && (
+                   <button type="button" onClick={handleDelete} className="px-4 py-2 font-bold uppercase text-red-600 border-2 border-transparent hover:border-red-600 rounded-lg transition-all text-sm">Delete Request</button>
+               )}
+               {/* Spacer if delete button is hidden to keep alignment? No, justify-between handles it. */}
+               {!((formData.createdById && currentUser && formData.createdById === currentUser.userId)) && <div></div>}
                
                <div className="flex gap-4">
                   <button type="button" onClick={() => { setIsEditing(false); onClose(); }} className="px-6 py-2 font-bold uppercase border-2 border-black rounded-lg hover:bg-black hover:text-white transition-all">Close</button>
                   {isEditing ? (
                     <button type="button" onClick={handleSave} className="px-8 py-2 font-bold uppercase border-2 border-black bg-black text-white rounded-lg shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">Save Changes</button>
                   ) : (
-                    <button type="button" onClick={() => setIsEditing(true)} className="px-8 py-2 font-bold uppercase border-2 border-black bg-white text-black rounded-lg hover:bg-black hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Edit</button>
+                    /* Only show Edit if authorized */
+                    (formData.createdById && currentUser && formData.createdById === currentUser.userId) && (
+                        <button type="button" onClick={() => setIsEditing(true)} className="px-8 py-2 font-bold uppercase border-2 border-black bg-white text-black rounded-lg hover:bg-black hover:text-white transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Edit</button>
+                    )
                   )}
                </div>
             </div>

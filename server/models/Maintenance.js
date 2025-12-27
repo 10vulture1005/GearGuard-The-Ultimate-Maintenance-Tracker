@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const maintenanceSchema = new mongoose.Schema({
   subject: { type: String, required: true },
   createdBy: { type: String, required: true },
+  createdById: { type: String, required: true },
   maintenanceFor: { type: String, required: true },
   equipment: {
     name: { type: String, required: true },

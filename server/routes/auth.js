@@ -39,7 +39,7 @@ router.post('/signup', async (req, res) => {
     // Mongoose: create returns the doc directly
     const user = await User.create({ email, name, password: hashedPassword });
 
-    const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({ message: 'User created', token });
   } catch (error) {
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Note: Mongoose uses _id
-    const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ message: 'Login successful', token });
   } catch (error) {
