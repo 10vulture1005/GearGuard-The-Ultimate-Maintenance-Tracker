@@ -110,8 +110,8 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({ message: 'OTP sent to email' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error in forgot-password:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
