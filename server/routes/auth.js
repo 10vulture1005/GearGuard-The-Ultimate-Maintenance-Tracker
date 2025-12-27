@@ -7,7 +7,7 @@ import { User } from '../models/User.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_jwt_key_12345';
 
 // Middleware to authenticate token
-const authenticateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 

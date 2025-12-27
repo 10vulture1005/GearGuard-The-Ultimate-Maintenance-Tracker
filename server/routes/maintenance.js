@@ -1,7 +1,11 @@
 import express from 'express';
 import { Maintenance } from '../models/Maintenance.js';
+import { authenticateToken } from './auth.js';
 
 const router = express.Router();
+
+// Apply middleware to all routes
+router.use(authenticateToken);
 
 // POST /maintenance/create
 router.post('/create', async (req, res) => {
@@ -41,12 +45,20 @@ router.get('/:id', async (req, res) => {
 // PUT /maintenance/update/:id
 router.put('/update/:id', async (req, res) => {
   try {
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ message: 'Request not found' });
+
+    // Check if the user is the creator
+    // Assuming request.createdBy stores the user ID
+    if (request.createdBy.toString() !== req.user.userId.toString()) {
+      return res.status(403).json({ message: 'You are not allowed to edit this request' });
+    }
+
     const updatedRequest = await Maintenance.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
-    if (!updatedRequest) return res.status(404).json({ message: 'Request not found' });
     res.json(updatedRequest);
   } catch (error) {
     console.error('Error updating request:', error);
@@ -57,8 +69,15 @@ router.put('/update/:id', async (req, res) => {
 // DELETE /maintenance/delete/:id
 router.delete('/delete/:id', async (req, res) => {
   try {
-    const deletedRequest = await Maintenance.findByIdAndDelete(req.params.id);
-    if (!deletedRequest) return res.status(404).json({ message: 'Request not found' });
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) return res.status(404).json({ message: 'Request not found' });
+
+    // Check if the user is the creator
+    if (request.createdBy.toString() !== req.user.userId.toString()) {
+      return res.status(403).json({ message: 'You are not allowed to delete this request' });
+    }
+
+    await Maintenance.findByIdAndDelete(req.params.id);
     res.json({ message: 'Request deleted successfully' });
   } catch (error) {
     console.error('Error deleting request:', error);
