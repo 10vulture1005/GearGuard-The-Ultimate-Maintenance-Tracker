@@ -11,9 +11,10 @@ const Equipment = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const initialForm = {
     name: '',
     serialNumber: '',
     category: '',
@@ -21,13 +22,35 @@ const Equipment = () => {
     location: '',
     purchaseDate: '',
     warrantyExpiration: '',
-    company: 'My Company (San Francisco)'
-  });
+    company: 'My Company (San Francisco)',
+    department: '',
+    employee: ''
+  };
+  const [formData, setFormData] = useState(initialForm);
 
   useEffect(() => {
     fetchData();
     fetchDropdowns();
   }, []);
+
+  useEffect(() => {
+    if (selectedItem) {
+      setFormData({
+        name: selectedItem.name,
+        serialNumber: selectedItem.serialNumber,
+        category: selectedItem.category?._id || selectedItem.category || '',
+        maintenanceTeam: selectedItem.maintenanceTeam?._id || selectedItem.maintenanceTeam || '',
+        location: selectedItem.location || '',
+        purchaseDate: selectedItem.purchaseDate ? selectedItem.purchaseDate.split('T')[0] : '',
+        warrantyExpiration: selectedItem.warrantyExpiration ? selectedItem.warrantyExpiration.split('T')[0] : '',
+        company: selectedItem.company || 'My Company (San Francisco)',
+        department: selectedItem.department || '',
+        employee: selectedItem.employee || ''
+      });
+    } else {
+      setFormData(initialForm);
+    }
+  }, [selectedItem]);
 
   const fetchData = async () => {
     try {
@@ -61,24 +84,30 @@ const Equipment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/equipment/create', formData);
+      if (selectedItem) {
+         await axios.put(`http://localhost:5000/equipment/update/${selectedItem._id}`, formData);
+      } else {
+         await axios.post('http://localhost:5000/equipment/create', formData);
+      }
       setIsModalOpen(false);
-      setFormData({
-        name: '',
-        serialNumber: '',
-        category: '',
-        maintenanceTeam: '',
-        location: '',
-        purchaseDate: '',
-        warrantyExpiration: '',
-        company: 'My Company (San Francisco)'
-      });
       fetchData();
     } catch (error) {
-      console.error('Error creating equipment:', error);
-      alert('Failed to create equipment');
+      console.error('Error saving equipment:', error);
+      alert('Failed to save equipment');
     }
   };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this equipment?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/equipment/delete/${selectedItem._id}`);
+      setIsModalOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting equipment:', error);
+      alert('Failed to delete equipment');
+    }
+  }
 
   // Transform data for display
   const tableData = data.map(item => ({
@@ -104,7 +133,7 @@ const Equipment = () => {
 
   return (
     <div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Equipment">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedItem ? "Edit Equipment" : "New Equipment"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-bold mb-1">Equipment Name</label>
@@ -134,21 +163,51 @@ const Equipment = () => {
                 </select>
              </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+             <div>
+               <label className="block text-sm font-bold mb-1">Department</label>
+               <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
+             </div>
+             <div>
+               <label className="block text-sm font-bold mb-1">Employee</label>
+               <input type="text" name="employee" value={formData.employee} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
+             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+             <div>
+               <label className="block text-sm font-bold mb-1">Purchase Date</label>
+               <input type="date" name="purchaseDate" value={formData.purchaseDate} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
+             </div>
+             <div>
+               <label className="block text-sm font-bold mb-1">Warranty Expires</label>
+               <input type="date" name="warrantyExpiration" value={formData.warrantyExpiration} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
+             </div>
+          </div>
           <div>
             <label className="block text-sm font-bold mb-1">Location</label>
             <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
           </div>
-          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">Create Equipment</button>
+          
+          <div className="flex gap-4 pt-4">
+             {selectedItem && (
+                 <button type="button" onClick={handleDelete} className="flex-1 rounded-lg border-2 border-red-500 text-red-500 font-bold py-2 hover:bg-red-50 transition-all">Delete</button>
+             )}
+             <button type="submit" className="flex-1 rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">{selectedItem ? 'Update' : 'Create'}</button>
+          </div>
         </form>
       </Modal>
 
       <PageHeader 
         title="Equipment Inventory" 
         onSearch={setSearchTerm} 
-        onNew={() => setIsModalOpen(true)}
+        onNew={() => { setSelectedItem(null); setIsModalOpen(true); }}
       />
 
-      <DataTable columns={columns} data={processedData} />
+      <DataTable 
+          columns={columns} 
+          data={processedData} 
+          onRowClick={(item) => { setSelectedItem(item); setIsModalOpen(true); }}
+      />
     </div>
   );
 };

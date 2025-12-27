@@ -15,6 +15,7 @@ const Calendar = () => {
   const { maintenanceRequests, refreshData } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const events = useMemo(() => {
     return maintenanceRequests.map(req => {

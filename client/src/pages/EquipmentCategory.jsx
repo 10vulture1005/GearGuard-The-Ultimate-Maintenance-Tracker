@@ -9,17 +9,31 @@ const EquipmentCategory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const initialForm = {
     name: '',
-    responsible: '', // Could be ID or name, ideally fetch users
+    responsible: '',
     company: 'My Company (San Francisco)'
-  });
+  };
+  const [formData, setFormData] = useState(initialForm);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (selectedItem) {
+        setFormData({
+            name: selectedItem.name,
+            responsible: selectedItem.responsible || '',
+            company: selectedItem.company || 'My Company (San Francisco)'
+        });
+    } else {
+        setFormData(initialForm);
+    }
+  }, [selectedItem]);
 
   const fetchData = async () => {
     try {
@@ -40,13 +54,28 @@ const EquipmentCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/equipment-categories/create', formData);
+      if (selectedItem) {
+          await axios.put(`http://localhost:5000/equipment-categories/update/${selectedItem._id}`, formData);
+      } else {
+          await axios.post('http://localhost:5000/equipment-categories/create', formData);
+      }
       setIsModalOpen(false);
-      setFormData({ name: '', responsible: '', company: 'My Company (San Francisco)' });
       fetchData();
     } catch (error) {
-      console.error('Error creating category:', error);
-      alert('Failed to create category');
+      console.error('Error saving category:', error);
+      alert('Failed to save category');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this category?')) return;
+    try {
+        await axios.delete(`http://localhost:5000/equipment-categories/delete/${selectedItem._id}`);
+        setIsModalOpen(false);
+        fetchData();
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        alert('Failed to delete category');
     }
   };
 
@@ -120,7 +149,7 @@ const EquipmentCategory = () => {
 
   return (
     <div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Category">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedItem ? "Edit Category" : "New Category"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-bold mb-1">Category Name</label>
@@ -134,13 +163,19 @@ const EquipmentCategory = () => {
             <label className="block text-sm font-bold mb-1">Company</label>
             <input type="text" name="company" value={formData.company} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
           </div>
-          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">Create Category</button>
+          
+          <div className="flex gap-4 pt-4">
+            {selectedItem && (
+                <button type="button" onClick={handleDelete} className="flex-1 rounded-lg border-2 border-red-500 text-red-500 font-bold py-2 hover:bg-red-50 transition-all">Delete</button>
+            )}
+            <button type="submit" className="flex-1 rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">{selectedItem ? 'Update' : 'Create'}</button>
+          </div>
         </form>
       </Modal>
       <PageHeader 
         title="Equipment Categories" 
         onSearch={setSearchTerm} 
-        onNew={() => setIsModalOpen(true)}
+        onNew={() => { setSelectedItem(null); setIsModalOpen(true); }}
         filterOptions={filterOptions}
         sortOptions={sortOptions}
         groupOptions={groupOptions}
@@ -158,11 +193,19 @@ const EquipmentCategory = () => {
               <span className="bg-black text-white px-2 py-1 text-sm rounded">{items.length}</span>
               {group}
             </h3>
-            <DataTable columns={columns} data={items} />
+            <DataTable 
+                columns={columns} 
+                data={items} 
+                onRowClick={(item) => { setSelectedItem(item); setIsModalOpen(true); }}
+            />
           </div>
         ))
       ) : (
-        <DataTable columns={columns} data={processedData} />
+        <DataTable 
+            columns={columns} 
+            data={processedData} 
+            onRowClick={(item) => { setSelectedItem(item); setIsModalOpen(true); }}
+        />
       )}
     </div>
   );
