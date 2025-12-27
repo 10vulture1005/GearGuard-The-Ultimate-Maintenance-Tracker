@@ -50,7 +50,7 @@ export default function Dashboard() {
   if (!user) return <div className="flex min-h-screen items-center justify-center font-bold text-2xl">LOADING...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div>
       <MaintenanceModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -58,31 +58,17 @@ export default function Dashboard() {
         requestToEdit={selectedRequest}
       />
       
-      <nav className="flex items-center justify-between border-b-2 border-black pb-4 mb-8 bg-white p-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h1 className="text-2xl font-black tracking-tighter uppercase">GearGuard Maintenance</h1>
-        <div className="flex gap-4">
-             <button
-              onClick={() => { setSelectedRequest(null); setIsModalOpen(true); }}
-              className="rounded-lg border-2 border-black bg-black text-white px-6 py-2 font-bold transition-all hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-            >
-              + NEW REQUEST
-            </button>
-            <button
-              onClick={() => navigate('/calendar')}
-              className="rounded-lg border-2 border-black bg-white px-6 py-2 font-bold text-black transition-all hover:bg-black hover:text-white"
-            >
-              CALENDAR
-            </button>
-            <button
-              onClick={handleLogout}
-              className="rounded-lg border-2 border-black bg-white px-6 py-2 font-bold text-black transition-all hover:bg-black hover:text-white"
-            >
-              LOGOUT
-            </button>
-        </div>
-      </nav>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-black tracking-tighter uppercase">Dashboard</h1>
+        <button
+          onClick={() => { setSelectedRequest(null); setIsModalOpen(true); }}
+          className="rounded-lg border-2 border-black bg-black text-white px-6 py-2 font-bold transition-all hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+        >
+          + NEW REQUEST
+        </button>
+      </div>
       
-      <main className="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* User Profile Card */}
         <div className="lg:col-span-1 h-fit rounded-2xl border-2 border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <h2 className="mb-4 text-xl font-black uppercase border-b-2 border-black pb-2">User Profile</h2>
@@ -156,7 +142,7 @@ export default function Dashboard() {
                 )}
             </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

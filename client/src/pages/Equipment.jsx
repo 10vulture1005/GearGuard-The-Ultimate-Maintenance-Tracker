@@ -8,6 +8,9 @@ const Equipment = () => {
   const [data, setData] = useState([]);
   const [teams, setTeams] = useState([]);
   const [categories, setCategories] = useState([]);
+  // New state for users dropdown
+  const [users, setUsers] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -24,7 +27,7 @@ const Equipment = () => {
     warrantyExpiration: '',
     company: 'My Company (San Francisco)',
     department: '',
-    employee: ''
+    employee: '' // Now stores User ID
   };
   const [formData, setFormData] = useState(initialForm);
 
@@ -45,7 +48,8 @@ const Equipment = () => {
         warrantyExpiration: selectedItem.warrantyExpiration ? selectedItem.warrantyExpiration.split('T')[0] : '',
         company: selectedItem.company || 'My Company (San Francisco)',
         department: selectedItem.department || '',
-        employee: selectedItem.employee || ''
+        // Handle object or string ID for employee
+        employee: selectedItem.employee?._id || selectedItem.employee || ''
       });
     } else {
       setFormData(initialForm);
@@ -66,14 +70,20 @@ const Equipment = () => {
 
   const fetchDropdowns = async () => {
     try {
-      const [teamRes, catRes] = await Promise.all([
+      const [teamRes, catRes, userRes] = await Promise.all([
         axios.get('http://localhost:5000/teams'),
-        axios.get('http://localhost:5000/equipment-categories')
+        axios.get('http://localhost:5000/equipment-categories'),
+        axios.get('http://localhost:5000/auth/users') // Assuming this endpoint exists, or we might need to create it
       ]);
       setTeams(teamRes.data);
       setCategories(catRes.data);
+      // Fallback if users endpoint doesn't exist, try getting from teams or just generic users list
+      // For now assume /auth/users exists or is accessible
+      setUsers(userRes.data); 
     } catch (error) {
       console.error('Error fetching dropdowns:', error);
+      // Fallback for demo if endpoint fails
+      setUsers([]);
     }
   };
 
@@ -113,15 +123,17 @@ const Equipment = () => {
   const tableData = data.map(item => ({
     ...item,
     categoryName: item.category?.name || 'N/A',
-    teamName: item.maintenanceTeam?.name || 'N/A'
+    teamName: item.maintenanceTeam?.name || 'N/A',
+    employeeName: item.employee?.name || 'Unassigned'
   }));
 
   const columns = [
-    { header: 'Name', accessor: 'name', width: '25%' },
+    { header: 'Name', accessor: 'name', width: '20%' },
     { header: 'Serial #', accessor: 'serialNumber', width: '20%' },
-    { header: 'Category', accessor: 'categoryName', width: '20%' },
-    { header: 'Team', accessor: 'teamName', width: '20%' },
-    { header: 'Location', accessor: 'location', width: '15%' },
+    { header: 'Category', accessor: 'categoryName', width: '15%' },
+    { header: 'Assigned To', accessor: 'employeeName', width: '20%' },
+    { header: 'Team', accessor: 'teamName', width: '15%' },
+    { header: 'Location', accessor: 'location', width: '10%' },
   ];
 
   const processedData = tableData.filter(item => 
@@ -169,8 +181,18 @@ const Equipment = () => {
                <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
              </div>
              <div>
-               <label className="block text-sm font-bold mb-1">Employee</label>
-               <input type="text" name="employee" value={formData.employee} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
+                <label className="block text-sm font-bold mb-1">Assigned Employee</label>
+                <select 
+                  name="employee" 
+                  value={formData.employee} 
+                  onChange={handleInputChange} 
+                  className="w-full rounded-lg border-2 border-black p-2 bg-white"
+                >
+                  <option value="">Unassigned</option>
+                  {users.map(u => (
+                    <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
+                  ))}
+                </select>
              </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

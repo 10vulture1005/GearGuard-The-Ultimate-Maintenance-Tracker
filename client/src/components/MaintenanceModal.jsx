@@ -220,9 +220,12 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh, initialDa
                             required
                          >
                             <option value="">Select Equipment</option>
-                            {equipmentOptions.map(eq => (
-                              <option key={eq._id} value={eq._id}>{eq.name} ({eq.serialNumber})</option>
-                            ))}
+                            {equipmentOptions
+                                .filter(eq => !eq.employee || (eq.employee._id === user?.id || eq.employee === user?.id)) // Show unassigned OR assigned to me
+                                .map(eq => (
+                                  <option key={eq._id} value={eq._id}>{eq.name} ({eq.serialNumber})</option>
+                                ))
+                            }
                          </select>
                        </div>
                        {/* Show read-only details if equipment selected */}

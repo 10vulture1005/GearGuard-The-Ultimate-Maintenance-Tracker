@@ -15,7 +15,8 @@ export const getAllEquipment = async (req, res) => {
     const equipment = await Equipment.find()
       .populate('category', 'name')
       .populate('maintenanceTeam', 'name')
-      .populate('technician', 'name email');
+      .populate('technician', 'name email')
+      .populate('employee', 'name email');
     res.json(equipment);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching equipment', error: error.message });

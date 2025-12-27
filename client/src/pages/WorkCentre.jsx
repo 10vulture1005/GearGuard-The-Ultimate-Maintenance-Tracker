@@ -9,20 +9,37 @@ const WorkCentre = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const initialForm = {
     name: '',
     code: '',
     costPerHour: 0,
     capacity: 1,
     timeEfficiency: 100,
     oeeTarget: 0
-  });
+  };
+  const [formData, setFormData] = useState(initialForm);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+     if (selectedItem) {
+        setFormData({
+            name: selectedItem.name,
+            code: selectedItem.code || '',
+            costPerHour: selectedItem.costPerHour || 0,
+            capacity: selectedItem.capacity || 1,
+            timeEfficiency: selectedItem.timeEfficiency || 100,
+            oeeTarget: selectedItem.oeeTarget || 0
+        });
+     } else {
+        setFormData(initialForm);
+     }
+  }, [selectedItem]);
 
   const fetchData = async () => {
     try {
@@ -43,20 +60,28 @@ const WorkCentre = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/work-centres/create', formData);
+      if (selectedItem) {
+          await axios.put(`http://localhost:5000/work-centres/update/${selectedItem._id}`, formData);
+      } else {
+          await axios.post('http://localhost:5000/work-centres/create', formData);
+      }
       setIsModalOpen(false);
-      setFormData({
-        name: '',
-        code: '',
-        costPerHour: 0,
-        capacity: 1,
-        timeEfficiency: 100,
-        oeeTarget: 0
-      });
       fetchData();
     } catch (error) {
-      console.error('Error creating work centre:', error);
-      alert('Failed to create work centre');
+      console.error('Error saving work centre:', error);
+      alert('Failed to save work centre');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this work center?')) return;
+    try {
+        await axios.delete(`http://localhost:5000/work-centres/delete/${selectedItem._id}`);
+        setIsModalOpen(false);
+        fetchData();
+    } catch (error) {
+        console.error('Error deleting work center:', error);
+        alert('Failed to delete work center');
     }
   };
 
@@ -77,7 +102,7 @@ const WorkCentre = () => {
 
   return (
     <div>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Work Center">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedItem ? "Edit Work Center" : "New Work Center"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-bold mb-1">Name</label>
@@ -97,17 +122,27 @@ const WorkCentre = () => {
                 <input type="number" name="capacity" value={formData.capacity} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
             </div>
           </div>
-          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">Create Work Center</button>
+          
+           <div className="flex gap-4 pt-4">
+            {selectedItem && (
+                <button type="button" onClick={handleDelete} className="flex-1 rounded-lg border-2 border-red-500 text-red-500 font-bold py-2 hover:bg-red-50 transition-all">Delete</button>
+            )}
+            <button type="submit" className="flex-1 rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">{selectedItem ? 'Update' : 'Create'}</button>
+          </div>
         </form>
       </Modal>
 
       <PageHeader 
         title="Work Centres" 
         onSearch={setSearchTerm} 
-        onNew={() => setIsModalOpen(true)}
+        onNew={() => { setSelectedItem(null); setIsModalOpen(true); }}
       />
 
-      <DataTable columns={columns} data={processedData} />
+      <DataTable 
+        columns={columns} 
+        data={processedData} 
+        onRowClick={(item) => { setSelectedItem(item); setIsModalOpen(true); }}
+      />
     </div>
   );
 };

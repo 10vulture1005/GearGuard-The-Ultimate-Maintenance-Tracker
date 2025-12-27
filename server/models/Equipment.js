@@ -29,7 +29,7 @@ const equipmentSchema = new mongoose.Schema({
   },
   // Ownership/Tracking
   department: { type: String }, // e.g., "Production"
-  employee: { type: String },   // e.g., "Person Name" (or User ref if strictly linked to users)
+  employee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   
   // Technical Details
   purchaseDate: { type: Date },
