@@ -1,6 +1,20 @@
 import React from 'react';
+import Dropdown from './Dropdown';
 
-const PageHeader = ({ title, onSearch, onNew }) => {
+const PageHeader = ({ 
+  title, 
+  onSearch, 
+  onNew, 
+  filterOptions = [], 
+  sortOptions = [], 
+  groupOptions = [],
+  onFilterChange,
+  onSortChange,
+  onGroupChange,
+  activeFilter,
+  activeSort,
+  activeGroup
+}) => {
   return (
     <div className="flex flex-col gap-6 mb-8">
       <div className="flex items-center justify-between gap-6">
@@ -22,20 +36,25 @@ const PageHeader = ({ title, onSearch, onNew }) => {
           />
         </div>
       </div>
-      <div className="flex gap-4">
-        {/* Mock controls for Sort/Filter/Group By as seen in Odoo */}
-        <div className="flex items-center gap-2 cursor-pointer text-gray-500 font-bold hover:text-black transition-colors">
-          <span>Filters</span>
-          <span className="text-xs">▼</span>
-        </div>
-        <div className="flex items-center gap-2 cursor-pointer text-gray-500 font-bold hover:text-black transition-colors">
-          <span>Group By</span>
-          <span className="text-xs">▼</span>
-        </div>
-        <div className="flex items-center gap-2 cursor-pointer text-gray-500 font-bold hover:text-black transition-colors">
-          <span>Favorites</span>
-          <span className="text-xs">▼</span>
-        </div>
+      <div className="flex gap-6 border-b-2 border-black pb-4">
+        <Dropdown 
+          label="Filters" 
+          options={filterOptions} 
+          onSelect={onFilterChange} 
+          activeValue={activeFilter}
+        />
+        <Dropdown 
+          label="Group By" 
+          options={groupOptions} 
+          onSelect={onGroupChange} 
+          activeValue={activeGroup}
+        />
+        <Dropdown 
+          label="Sort By" 
+          options={sortOptions} 
+          onSelect={onSortChange} 
+          activeValue={activeSort}
+        />
       </div>
     </div>
   );
