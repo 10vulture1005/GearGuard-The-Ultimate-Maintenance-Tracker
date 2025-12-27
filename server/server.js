@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- DATABASE TOGGLE ---
-const USE_LOCAL_DB = true; // Set to true for local MongoDB, false for Atlas
+const USE_LOCAL_DB = false; // Set to true for local MongoDB, false for Atlas
 // -----------------------
 
 // MongoDB Atlas connection string from .env
@@ -30,7 +30,7 @@ if (!MONGO_URI) {
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://gear-guard-the-ultimate-maintenance-gamma.vercel.app'],
     credentials: true,
 }));
 app.use(express.json());
