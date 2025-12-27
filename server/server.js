@@ -8,8 +8,16 @@ import maintenanceRoutes from './routes/maintenance.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/login-system';
 
+// MongoDB Atlas connection string from .env
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error('❌ MONGO_URI not set in .env!');
+  process.exit(1);
+}
+
+// Middleware
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
@@ -20,37 +28,25 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/maintenance', maintenanceRoutes);
 
-
 // Health check
 app.get('/', (req, res) => {
-  res.send('API is running (MongoDB)');
+  res.send('API is running (MongoDB Atlas)');
 });
 
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
-// Connect to MongoDB and Start Server
+// Connect to MongoDB Atlas
 const connectDB = async () => {
   try {
-    console.log('Attempting to connect to MongoDB at', MONGO_URI);
+    console.log('🔌 Connecting to MongoDB Atlas...');
     await mongoose.connect(MONGO_URI);
-    console.log('MongoDB connected');
+    console.log('✅ MongoDB Atlas connected');
   } catch (err) {
-    console.error('Local MongoDB connection failed:', err.message);
-    console.log('Falling back to in-memory MongoDB...');
-    try {
-      const mongod = await MongoMemoryServer.create();
-      const uri = mongod.getUri();
-      console.log('In-memory MongoDB started at', uri);
-      await mongoose.connect(uri);
-      console.log('In-memory MongoDB connected. Note: Data will be lost on restart.');
-    } catch (memErr) {
-      console.error('Failed to start in-memory MongoDB:', memErr);
-    }
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1); // Stop server if DB connection fails
   }
 };
 
 connectDB();
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
