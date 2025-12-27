@@ -8,6 +8,7 @@ const Layout = ({ children }) => {
     { path: '/teams', label: 'Teams' },
     { path: '/equipment-category', label: 'Categories' },
     { path: '/work-centres', label: 'Work Centres' },
+    { path: '/calendar', label: 'Calendar' },
   ];
 
   return (

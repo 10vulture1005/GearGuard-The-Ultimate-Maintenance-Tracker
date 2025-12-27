@@ -7,6 +7,7 @@ import Equipment from './pages/Equipment';
 import Teams from './pages/Teams';
 import EquipmentCategory from './pages/EquipmentCategory';
 import WorkCentre from './pages/WorkCentre';
+import Calendar from './pages/Calendar';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/teams" element={<Layout><Teams /></Layout>} />
         <Route path="/equipment-category" element={<Layout><EquipmentCategory /></Layout>} />
         <Route path="/work-centres" element={<Layout><WorkCentre /></Layout>} />
+        <Route path="/calendar" element={<Layout><Calendar /></Layout>} />
 
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

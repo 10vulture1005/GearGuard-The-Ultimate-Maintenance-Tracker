@@ -61,6 +61,12 @@ export default function Dashboard() {
               + NEW REQUEST
             </button>
             <button
+              onClick={() => navigate('/calendar')}
+              className="rounded-lg border-2 border-black bg-white px-6 py-2 font-bold text-black transition-all hover:bg-black hover:text-white"
+            >
+              CALENDAR
+            </button>
+            <button
               onClick={handleLogout}
               className="rounded-lg border-2 border-black bg-white px-6 py-2 font-bold text-black transition-all hover:bg-black hover:text-white"
             >
