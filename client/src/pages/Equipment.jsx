@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
+import Modal from '../components/Modal';
 
 const Equipment = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns = [
     { header: 'Equipment Name', accessor: 'name', width: '20%' },
@@ -29,10 +31,23 @@ const Equipment = () => {
 
   return (
     <div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Equipment">
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold mb-1">Equipment Name</label>
+            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-1">Serial Number</label>
+            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+          </div>
+          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800">Save</button>
+        </form>
+      </Modal>
       <PageHeader 
         title="Equipment" 
         onSearch={setSearchTerm} 
-        onNew={() => alert('Create New Equipment')}
+        onNew={() => setIsModalOpen(true)}
       />
       <DataTable columns={columns} data={filteredData} />
     </div>
