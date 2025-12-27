@@ -5,7 +5,7 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
   const [formData, setFormData] = useState({
     subject: '',
     // createdBy: '', // Handled by backend
-    maintenanceFor: '',
+    maintenanceFor: 'Equipment',
     equipment: { name: '', id: '', category: '' },
     requestDate: new Date().toISOString().split('T')[0],
     maintenanceType: 'Corrective',
@@ -84,7 +84,10 @@ export default function MaintenanceModal({ isOpen, onClose, onRefresh }) {
 
               <div>
                 <label className="block text-xs font-bold uppercase mb-1">Maintenance For</label>
-                <input type="text" name="maintenanceFor" value={formData.maintenanceFor} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all" required />
+                <select name="maintenanceFor" value={formData.maintenanceFor} onChange={handleChange} className="w-full border-2 border-black rounded-lg p-2 focus:ring-0 focus:outline-none focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-white">
+                  <option value="Equipment">Equipment</option>
+                  <option value="Work Center">Work Center</option>
+                </select>
               </div>
 
               <div className="p-4 border-2 border-black rounded-lg bg-gray-50">
