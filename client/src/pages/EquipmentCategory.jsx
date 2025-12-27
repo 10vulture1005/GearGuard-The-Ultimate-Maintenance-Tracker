@@ -38,7 +38,7 @@ const EquipmentCategory = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/equipment-categories');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/equipment-categories`);
       setData(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -55,9 +55,9 @@ const EquipmentCategory = () => {
     e.preventDefault();
     try {
       if (selectedItem) {
-          await axios.put(`http://localhost:5000/equipment-categories/update/${selectedItem._id}`, formData);
+          await axios.put(`${import.meta.env.VITE_API_URL}/equipment-categories/update/${selectedItem._id}`, formData);
       } else {
-          await axios.post('http://localhost:5000/equipment-categories/create', formData);
+          await axios.post(`${import.meta.env.VITE_API_URL}/equipment-categories/create`, formData);
       }
       setIsModalOpen(false);
       fetchData();
@@ -70,7 +70,7 @@ const EquipmentCategory = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
     try {
-        await axios.delete(`http://localhost:5000/equipment-categories/delete/${selectedItem._id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/equipment-categories/delete/${selectedItem._id}`);
         setIsModalOpen(false);
         fetchData();
     } catch (error) {

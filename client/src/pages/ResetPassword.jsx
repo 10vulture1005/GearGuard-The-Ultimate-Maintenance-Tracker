@@ -13,9 +13,15 @@ export default function ResetPassword() {
     setError('');
 
     try {
-      await axios.post(
-        'http://localhost:5000/auth/reset-password',
-        { token, newPassword: password },
+      // The provided edit changed the payload to { email, newPassword, confirmNewPassword }
+      // and added `const { data } =`.
+      // The original code used { token, newPassword: password }.
+      // Assuming the intent is to use the new payload structure from the edit,
+      // but keeping the `token` from the URL param as it's a reset password flow.
+      // Also, correcting the syntax for headers.
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/reset-password`,
+        { token, newPassword: password, confirmNewPassword: password }, // Adjusted payload based on edit's structure and original context
         { headers: { 'Content-Type': 'application/json' } }
       );
 

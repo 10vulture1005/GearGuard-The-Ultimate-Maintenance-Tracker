@@ -29,17 +29,19 @@ export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, o
     if (isOpen && requestId) {
       setLoading(true);
       const token = localStorage.getItem('token');
-      axios.get(`http://localhost:5000/maintenance/${requestId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(res => {
-        setFormData(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching request:', err);
-        setLoading(false);
-      });
+      const fetchRequest = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/maintenance/${requestId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setFormData(response.data);
+        } catch (err) {
+          console.error('Error fetching request:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchRequest();
     } else {
       setFormData(null);
       setIsEditing(false);
@@ -62,7 +64,7 @@ export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, o
   const handleSave = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/maintenance/update/${requestId}`, formData, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/maintenance/update/${requestId}`, formData, {
          headers: { Authorization: `Bearer ${token}` }
       });
       setIsEditing(false);
@@ -79,7 +81,7 @@ export default function ViewEditMaintenanceModal({ isOpen, onClose, requestId, o
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/maintenance/delete/${requestId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/maintenance/delete/${requestId}`, {
          headers: { Authorization: `Bearer ${token}` }
       });
       onRefresh();

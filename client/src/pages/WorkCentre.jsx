@@ -44,7 +44,7 @@ const WorkCentre = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/work-centres');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/work-centres`);
       setData(response.data);
     } catch (error) {
       console.error('Error fetching work centres:', error);
@@ -61,9 +61,9 @@ const WorkCentre = () => {
     e.preventDefault();
     try {
       if (selectedItem) {
-          await axios.put(`http://localhost:5000/work-centres/update/${selectedItem._id}`, formData);
+          await axios.put(`${import.meta.env.VITE_API_URL}/work-centres/update/${selectedItem._id}`, formData);
       } else {
-          await axios.post('http://localhost:5000/work-centres/create', formData);
+          await axios.post(`${import.meta.env.VITE_API_URL}/work-centres/create`, formData);
       }
       setIsModalOpen(false);
       fetchData();
@@ -76,7 +76,7 @@ const WorkCentre = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this work center?')) return;
     try {
-        await axios.delete(`http://localhost:5000/work-centres/delete/${selectedItem._id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/work-centres/delete/${selectedItem._id}`);
         setIsModalOpen(false);
         fetchData();
     } catch (error) {

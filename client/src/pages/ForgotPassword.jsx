@@ -13,7 +13,7 @@ export default function ForgotPassword() {
 
     try {
       const { data } = await axios.post(
-        'http://localhost:5000/auth/forgot-password',
+        `${import.meta.env.VITE_API_URL}/auth/forgot-password`,
         { email },
         { headers: { 'Content-Type': 'application/json' } }
       );
