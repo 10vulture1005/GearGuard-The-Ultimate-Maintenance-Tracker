@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- DATABASE TOGGLE ---
-const USE_LOCAL_DB = true; // Set to true for local MongoDB, false for Atlas
+const USE_LOCAL_DB = false; // Set to true for local MongoDB, false for Atlas
 // -----------------------
 
 // MongoDB Atlas connection string from .env
@@ -30,7 +30,7 @@ if (!MONGO_URI) {
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://gear-guard-the-ultimate-maintenance-gamma.vercel.app'],
     credentials: true,
 }));
 app.use(express.json());
@@ -51,17 +51,27 @@ app.get('/', (req, res) => {
 // Connect to MongoDB Atlas
 const connectDB = async () => {
   try {
+    if (mongoose.connection.readyState >= 1) return;
     console.log('🔌 Connecting to MongoDB...');
     await mongoose.connect(MONGO_URI);
     console.log(`✅ MongoDB connected (${USE_LOCAL_DB ? 'Local' : 'Atlas'})`);
   } catch (err) {
     console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1); // Stop server if DB connection fails
+    // Do not exit process in serverless environment
   }
 };
 
 connectDB();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.get('/', (req, res) => {
+    res.send('GearGuard API is running');
 });
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}
+
+export default app;

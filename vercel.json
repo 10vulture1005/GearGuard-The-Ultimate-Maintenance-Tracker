@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/auth/(.*)", "destination": "/server/server.js" },
+    { "source": "/maintenance/(.*)", "destination": "/server/server.js" },
+    { "source": "/equipment/(.*)", "destination": "/server/server.js" },
+    { "source": "/teams/(.*)", "destination": "/server/server.js" },
+    { "source": "/work-centres/(.*)", "destination": "/server/server.js" },
+    { "source": "/equipment-categories/(.*)", "destination": "/server/server.js" },
+    { "source": "/(.*)", "destination": "/client/index.html" }
+  ]
+}
