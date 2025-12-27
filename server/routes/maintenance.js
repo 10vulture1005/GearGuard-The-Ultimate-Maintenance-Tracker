@@ -10,11 +10,16 @@ router.use(authenticateToken);
 // POST /maintenance/create
 router.post('/create', async (req, res) => {
   try {
+    const { equipment, workCentre, maintenanceTeam, ...rest } = req.body;
+
     const newRequest = new Maintenance({
-      ...req.body,
-      createdBy: req.user.name || req.body.createdBy, // Fallback if name not in token/user object, though it should be
-      createdById: req.user.userId
+      ...rest,
+      equipment: equipment || undefined,
+      workCentre: workCentre || undefined,
+      maintenanceTeam: maintenanceTeam || undefined,
+      createdBy: req.user.userId // Use ID from token
     });
+    
     const savedRequest = await newRequest.save();
     res.status(201).json(savedRequest);
   } catch (error) {
@@ -53,18 +58,9 @@ router.put('/update/:id', async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
     // Check if the user is the creator
-    // Assuming request.createdBy stores the user ID
-    // Check if the user is the creator
-    if (request.createdById && request.createdById.toString() !== req.user.userId.toString()) {
+    
+    if (request.createdBy && request.createdBy.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ message: 'You are not allowed to edit this request' });
-    }
-    // Fallback for legacy records without createdById (optional, deny or allow based on policy - here we deny if field missing for safety or maybe allow if we trust createdBy string matched? safer to rely on ID)
-    if (!request.createdById && request.createdBy !== req.user.email) { // simplistic fallback, likely not needed if fresh db
-         // If we don't have createdById, we can't securely check. 
-         // For now, let's assume we proceed or block. Given the requirement, let's strictly block if we can't verify.
-         // But to avoid breaking existing data immediately, we might skip this if the field is missing. 
-         // However, the prompt says "currently someone who has created the request cant edit", implying we just need to fix the check.
-         // So I will just stick to the new check.
     }
 
     const updatedRequest = await Maintenance.findByIdAndUpdate(
@@ -86,8 +82,7 @@ router.delete('/delete/:id', async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
     // Check if the user is the creator
-    // Check if the user is the creator
-    if (request.createdById && request.createdById.toString() !== req.user.userId.toString()) {
+    if (request.createdBy && request.createdBy.toString() !== req.user.userId.toString()) {
       return res.status(403).json({ message: 'You are not allowed to delete this request' });
     }
 
@@ -100,3 +95,4 @@ router.delete('/delete/:id', async (req, res) => {
 });
 
 export default router;
+

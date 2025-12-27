@@ -1,159 +1,154 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
+import axios from 'axios';
 
 const Equipment = () => {
+  const [data, setData] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const columns = [
-    { header: 'Equipment Name', accessor: 'name', width: '20%' },
-    { header: 'Employee', accessor: 'employee', width: '15%' },
-    { header: 'Department', accessor: 'department', width: '15%' },
-    { header: 'Serial Number', accessor: 'serialNumber', width: '15%' },
-    { header: 'Technician', accessor: 'technician', width: '15%' },
-    { header: 'Equipment Category', accessor: 'category', width: '10%' },
-    { header: 'Company', accessor: 'company', width: '10%' },
-  ];
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    serialNumber: '',
+    category: '',
+    maintenanceTeam: '',
+    location: '',
+    purchaseDate: '',
+    warrantyExpiration: '',
+    company: 'My Company (San Francisco)'
+  });
 
-  const initialData = [
-    { name: 'Samsung Monitor 15"', employee: 'Tejas Modi', department: 'Admin', serialNumber: 'MT/125/22778837', technician: 'Mitchell Admin', category: 'Monitors', company: 'My Company (San Francisco)' },
-    { name: 'Acer Laptop', employee: 'Bhaumik P', department: 'Technician', serialNumber: 'MT/122/11112222', technician: 'Marc Demo', category: 'Computers', company: 'My Company (San Francisco)' },
-    { name: 'HP Printer', employee: 'John Doe', department: 'Sales', serialNumber: 'MT/123/44556677', technician: 'Mitchell Admin', category: 'Printers', company: 'My Company (San Francisco)' },
-    { name: 'Dell Desktop', employee: 'Jane Smith', department: 'IT', serialNumber: 'MT/124/99887766', technician: 'Marc Demo', category: 'Computers', company: 'My Company (San Francisco)' },
-  ];
+  useEffect(() => {
+    fetchData();
+    fetchDropdowns();
+  }, []);
 
-  const [activeFilter, setActiveFilter] = useState(null);
-  const [activeSort, setActiveSort] = useState(null);
-  const [activeGroup, setActiveGroup] = useState(null);
-
-  const filterOptions = [
-    { label: 'My Equipment', value: 'my_equipment' },
-    { label: 'Assigned', value: 'assigned' },
-    { label: 'Unassigned', value: 'unassigned' },
-  ];
-
-  const sortOptions = [
-    { label: 'Name (A-Z)', value: 'name_asc' },
-    { label: 'Name (Z-A)', value: 'name_desc' },
-    { label: 'Serial Number', value: 'serial' },
-  ];
-
-  const groupOptions = [
-    { label: 'Department', value: 'department' },
-    { label: 'Equipment Category', value: 'category' },
-    { label: 'Company', value: 'company' },
-  ];
-
-  const processData = () => {
-    let processed = [...initialData];
-
-    // 1. Search
-    if (searchTerm) {
-      processed = processed.filter(item => 
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/equipment');
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching equipment:', error);
+    } finally {
+      setLoading(false);
     }
-
-    // 2. Filter
-    if (activeFilter === 'my_equipment') {
-      // Mock logic: assume "John Doe" is the logged-in user
-      processed = processed.filter(item => item.employee === 'John Doe');
-    } else if (activeFilter === 'assigned') {
-      processed = processed.filter(item => item.employee);
-    } else if (activeFilter === 'unassigned') {
-      processed = processed.filter(item => !item.employee);
-    }
-
-    // 3. Sort
-    if (activeSort === 'name_asc') {
-      processed.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (activeSort === 'name_desc') {
-      processed.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (activeSort === 'serial') {
-      processed.sort((a, b) => a.serialNumber.localeCompare(b.serialNumber));
-    }
-
-    // 4. Group
-    if (activeGroup) {
-      const grouped = processed.reduce((acc, item) => {
-        const key = item[activeGroup] || 'Undefined';
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(item);
-        return acc;
-      }, {});
-      return { isGrouped: true, data: grouped };
-    }
-
-    return { isGrouped: false, data: processed };
   };
 
-  const { isGrouped, data: processedData } = processData();
+  const fetchDropdowns = async () => {
+    try {
+      const [teamRes, catRes] = await Promise.all([
+        axios.get('http://localhost:5000/teams'),
+        axios.get('http://localhost:5000/equipment-categories')
+      ]);
+      setTeams(teamRes.data);
+      setCategories(catRes.data);
+    } catch (error) {
+      console.error('Error fetching dropdowns:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/equipment/create', formData);
+      setIsModalOpen(false);
+      setFormData({
+        name: '',
+        serialNumber: '',
+        category: '',
+        maintenanceTeam: '',
+        location: '',
+        purchaseDate: '',
+        warrantyExpiration: '',
+        company: 'My Company (San Francisco)'
+      });
+      fetchData();
+    } catch (error) {
+      console.error('Error creating equipment:', error);
+      alert('Failed to create equipment');
+    }
+  };
+
+  // Transform data for display
+  const tableData = data.map(item => ({
+    ...item,
+    categoryName: item.category?.name || 'N/A',
+    teamName: item.maintenanceTeam?.name || 'N/A'
+  }));
+
+  const columns = [
+    { header: 'Name', accessor: 'name', width: '25%' },
+    { header: 'Serial #', accessor: 'serialNumber', width: '20%' },
+    { header: 'Category', accessor: 'categoryName', width: '20%' },
+    { header: 'Team', accessor: 'teamName', width: '20%' },
+    { header: 'Location', accessor: 'location', width: '15%' },
+  ];
+
+  const processedData = tableData.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) return <div className="p-8 text-center font-bold">Loading Equipment...</div>;
 
   return (
     <div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Equipment">
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-bold mb-1">Equipment Name</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
-          </div>
-          <div>
-            <label className="block text-sm font-bold mb-1">Employee</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
-          </div>
-          <div>
-            <label className="block text-sm font-bold mb-1">Department</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" required />
           </div>
           <div>
             <label className="block text-sm font-bold mb-1">Serial Number</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <input type="text" name="serialNumber" value={formData.serialNumber} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" required />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+             <div>
+                <label className="block text-sm font-bold mb-1">Category</label>
+                <select name="category" value={formData.category} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2 bg-white" required>
+                  <option value="">Select Category</option>
+                  {categories.map(c => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
+                </select>
+             </div>
+             <div>
+                <label className="block text-sm font-bold mb-1">Team</label>
+                <select name="maintenanceTeam" value={formData.maintenanceTeam} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2 bg-white" required>
+                  <option value="">Select Team</option>
+                  {teams.map(t => (
+                    <option key={t._id} value={t._id}>{t.name}</option>
+                  ))}
+                </select>
+             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold mb-1">Technician</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <label className="block text-sm font-bold mb-1">Location</label>
+            <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
           </div>
-          <div>
-            <label className="block text-sm font-bold mb-1">Equipment Category</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
-          </div>
-          <div>
-            <label className="block text-sm font-bold mb-1">Company</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
-          </div>
-          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800">Save</button>
+          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">Create Equipment</button>
         </form>
       </Modal>
+
       <PageHeader 
-        title="Equipment" 
+        title="Equipment Inventory" 
         onSearch={setSearchTerm} 
         onNew={() => setIsModalOpen(true)}
-        filterOptions={filterOptions}
-        sortOptions={sortOptions}
-        groupOptions={groupOptions}
-        onFilterChange={setActiveFilter}
-        onSortChange={setActiveSort}
-        onGroupChange={setActiveGroup}
-        activeFilter={activeFilter}
-        activeSort={activeSort}
-        activeGroup={activeGroup}
       />
-      {isGrouped ? (
-        Object.entries(processedData).map(([group, items]) => (
-          <div key={group} className="mb-8">
-            <h3 className="text-xl font-black mb-4 uppercase flex items-center gap-2">
-              <span className="bg-black text-white px-2 py-1 text-sm rounded">{items.length}</span>
-              {group}
-            </h3>
-            <DataTable columns={columns} data={items} />
-          </div>
-        ))
-      ) : (
-        <DataTable columns={columns} data={processedData} />
-      )}
+
+      <DataTable columns={columns} data={processedData} />
     </div>
   );
 };

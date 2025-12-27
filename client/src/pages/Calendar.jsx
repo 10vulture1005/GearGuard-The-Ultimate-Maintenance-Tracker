@@ -5,33 +5,71 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import PageHeader from '../components/PageHeader';
 
 import CustomToolbar from '../components/CustomToolbar';
+import { useData } from '../context/DataContext';
 
 const localizer = momentLocalizer(moment);
 
-const Calendar = () => {
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: 'Maintenance: Drill 1',
-      start: new Date(2025, 11, 18, 10, 0), // Dec 18, 2025 10:00 AM
-      end: new Date(2025, 11, 18, 12, 0),
-      resourceId: 1,
-    },
-    {
-      id: 2,
-      title: 'Repair: Assembly Line',
-      start: new Date(2025, 11, 19, 14, 0),
-      end: new Date(2025, 11, 19, 16, 30),
-      resourceId: 2,
-    },
-  ]);
+import MaintenanceModal from '../components/MaintenanceModal';
 
-  const { components, defaultDate, views } = useMemo(() => ({
+const Calendar = () => {
+  const { maintenanceRequests, refreshData } = useData();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  const events = useMemo(() => {
+    return maintenanceRequests.map(req => {
+      const start = req.scheduledDate ? new Date(req.scheduledDate) : new Date();
+      const end = req.scheduledDate ? moment(req.scheduledDate).add(1, 'hours').toDate() : moment(start).add(1, 'hours').toDate();
+      return {
+        id: req._id,
+        title: req.subject,
+        start,
+        end,
+        resourceId: req.equipment?._id,
+        originalRequest: req // Pass full object for editing
+      };
+    });
+  }, [maintenanceRequests]);
+
+  const [date, setDate] = useState(new Date(2025, 11, 14));
+  const [view, setView] = useState('week');
+
+  const onNavigate = (newDate) => {
+    setDate(newDate);
+  };
+
+  const onView = (newView) => {
+    setView(newView);
+  };
+
+  const handleSelectSlot = ({ start }) => {
+    setSelectedDate(start);
+    setSelectedRequest(null); // Clear edit mode
+    setIsModalOpen(true);
+  };
+
+  const handleSelectEvent = (event) => {
+      console.log('Selected Event Clicked:', event);
+      // Look up independent of the event object to ensure we have the full, fresh data
+      const fullRequest = maintenanceRequests.find(req => req._id === event.id);
+      console.log('Found Full Request:', fullRequest);
+      
+      if (fullRequest) {
+        setSelectedRequest(fullRequest);
+        setIsModalOpen(true);
+      } else {
+        console.error('Could not find original request for event:', event);
+      }
+  };
+
+  const handleRefresh = () => {
+    refreshData();
+  };
+
+  const { components } = useMemo(() => ({
     components: {
       toolbar: CustomToolbar,
     },
-    defaultDate: new Date(2025, 11, 14),
-    views: ['month', 'week', 'day'],
   }), []);
 
   // Custom styling for calendar events to match Neo-Brutalist theme
@@ -50,6 +88,13 @@ const Calendar = () => {
 
   return (
     <div className="h-full flex flex-col">
+      <MaintenanceModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onRefresh={handleRefresh}
+        initialDate={selectedDate}
+        requestToEdit={selectedRequest}
+      />
       <PageHeader 
         title="Maintenance Calendar" 
       />
@@ -98,11 +143,16 @@ const Calendar = () => {
           startAccessor="start"
           endAccessor="end"
           style={{ height: 'calc(100vh - 250px)' }}
-          defaultView="week"
-          views={views}
+          view={view}
+          date={date}
+          onNavigate={onNavigate}
+          onView={onView}
           eventPropGetter={eventStyleGetter}
-          defaultDate={defaultDate}
           components={components}
+          selectable
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          scrollToTime={new Date(1970, 1, 1, 8)} // Scroll to 8 AM
         />
       </div>
     </div>

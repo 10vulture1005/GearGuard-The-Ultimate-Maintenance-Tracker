@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import MaintenanceModal from '../components/MaintenanceModal.jsx';
-import ViewEditMaintenanceModal from '../components/ViewEditMaintenanceModal.jsx';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const navigate = useNavigate();
 
@@ -52,14 +51,18 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <MaintenanceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={handleRefresh} />
-      <ViewEditMaintenanceModal isOpen={!!selectedRequestId} requestId={selectedRequestId} onClose={() => setSelectedRequestId(null)} onRefresh={handleRefresh} />
+      <MaintenanceModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onRefresh={handleRefresh} 
+        requestToEdit={selectedRequest}
+      />
       
       <nav className="flex items-center justify-between border-b-2 border-black pb-4 mb-8 bg-white p-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <h1 className="text-2xl font-black tracking-tighter uppercase">GearGuard Maintenance</h1>
         <div className="flex gap-4">
              <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => { setSelectedRequest(null); setIsModalOpen(true); }}
               className="rounded-lg border-2 border-black bg-black text-white px-6 py-2 font-bold transition-all hover:bg-white hover:text-black hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
               + NEW REQUEST
@@ -110,11 +113,11 @@ export default function Dashboard() {
                 {maintenanceRequests.length === 0 ? (
                     <div className="p-10 text-center border-2 border-dashed border-black rounded-2xl bg-white">
                         <p className="text-xl font-bold text-gray-400">No maintenance requests found.</p>
-                        <button onClick={() => setIsModalOpen(true)} className="mt-4 text-black font-bold underline">Create one now</button>
+                        <button onClick={() => { setSelectedRequest(null); setIsModalOpen(true); }} className="mt-4 text-black font-bold underline">Create one now</button>
                     </div>
                 ) : (
                     maintenanceRequests.map(req => (
-                        <div key={req._id} onClick={() => setSelectedRequestId(req._id)} className="group relative rounded-xl border-2 border-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
+                        <div key={req._id} onClick={() => { setSelectedRequest(req); setIsModalOpen(true); }} className="group relative rounded-xl border-2 border-black bg-white p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">

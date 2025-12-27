@@ -5,15 +5,26 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import maintenanceRoutes from './routes/maintenance.js';
+import equipmentRoutes from './routes/equipmentRoutes.js';
+import teamRoutes from './routes/teamRoutes.js';
+import workCentreRoutes from './routes/workCentreRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// --- DATABASE TOGGLE ---
+const USE_LOCAL_DB = true; // Set to true for local MongoDB, false for Atlas
+// -----------------------
+
 // MongoDB Atlas connection string from .env
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI_ATLAS = process.env.MONGO_URI;
+const MONGO_URI_LOCAL = 'mongodb://localhost:27017/gearguard';
+
+const MONGO_URI = USE_LOCAL_DB ? MONGO_URI_LOCAL : MONGO_URI_ATLAS;
 
 if (!MONGO_URI) {
-  console.error('❌ MONGO_URI not set in .env!');
+  console.error('❌ MONGO_URI not set! Check .env or toggle settings.');
   process.exit(1);
 }
 
@@ -27,18 +38,22 @@ app.use(express.json());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/maintenance', maintenanceRoutes);
+app.use('/equipment', equipmentRoutes);
+app.use('/teams', teamRoutes);
+app.use('/work-centres', workCentreRoutes);
+app.use('/equipment-categories', categoryRoutes);
 
 // Health check
 app.get('/', (req, res) => {
-  res.send('API is running (MongoDB Atlas)');
+  res.send(`API is running (MongoDB ${USE_LOCAL_DB ? 'Local' : 'Atlas'})`);
 });
 
 // Connect to MongoDB Atlas
 const connectDB = async () => {
   try {
-    console.log('🔌 Connecting to MongoDB Atlas...');
+    console.log('🔌 Connecting to MongoDB...');
     await mongoose.connect(MONGO_URI);
-    console.log('✅ MongoDB Atlas connected');
+    console.log(`✅ MongoDB connected (${USE_LOCAL_DB ? 'Local' : 'Atlas'})`);
   } catch (err) {
     console.error('❌ MongoDB connection failed:', err.message);
     process.exit(1); // Stop server if DB connection fails

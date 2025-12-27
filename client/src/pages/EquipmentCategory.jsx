@@ -1,11 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../components/PageHeader';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
+import axios from 'axios';
 
 const EquipmentCategory = () => {
+  const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    responsible: '', // Could be ID or name, ideally fetch users
+    company: 'My Company (San Francisco)'
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/equipment-categories');
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/equipment-categories/create', formData);
+      setIsModalOpen(false);
+      setFormData({ name: '', responsible: '', company: 'My Company (San Francisco)' });
+      fetchData();
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert('Failed to create category');
+    }
+  };
 
   const columns = [
     { header: 'Name', accessor: 'name', width: '30%' },
@@ -13,11 +56,9 @@ const EquipmentCategory = () => {
     { header: 'Company', accessor: 'company', width: '40%' },
   ];
 
-  const initialData = [
-    { name: 'Computers', responsible: 'OdooBot', company: 'My Company (San Francisco)' },
-    { name: 'Software', responsible: 'OdooBot', company: 'My Company (San Francisco)' },
-    { name: 'Monitors', responsible: 'Mitchell Admin', company: 'My Company (San Francisco)' },
-  ];
+  /* 
+  const initialData = [...] // Removed
+  */
 
   const [activeFilter, setActiveFilter] = useState(null);
   const [activeSort, setActiveSort] = useState(null);
@@ -38,7 +79,7 @@ const EquipmentCategory = () => {
   ];
 
   const processData = () => {
-    let processed = [...initialData];
+    let processed = [...data];
 
     // 1. Search
     if (searchTerm) {
@@ -75,23 +116,25 @@ const EquipmentCategory = () => {
 
   const { isGrouped, data: processedData } = processData();
 
+  if (loading) return <div className="p-8 text-center font-bold">Loading Categories...</div>;
+
   return (
     <div>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Category">
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-bold mb-1">Category Name</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" required />
           </div>
           <div>
             <label className="block text-sm font-bold mb-1">Responsible</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <input type="text" name="responsible" value={formData.responsible} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
           </div>
           <div>
             <label className="block text-sm font-bold mb-1">Company</label>
-            <input type="text" className="w-full rounded-lg border-2 border-black p-2" />
+            <input type="text" name="company" value={formData.company} onChange={handleInputChange} className="w-full rounded-lg border-2 border-black p-2" />
           </div>
-          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800">Save</button>
+          <button type="submit" className="w-full rounded-lg bg-black text-white font-bold py-2 hover:bg-gray-800 transition-all">Create Category</button>
         </form>
       </Modal>
       <PageHeader 
