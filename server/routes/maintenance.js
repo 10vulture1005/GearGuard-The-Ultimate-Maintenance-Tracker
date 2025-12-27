@@ -31,7 +31,12 @@ router.post('/create', async (req, res) => {
 // GET /maintenance/all
 router.get('/all', async (req, res) => {
   try {
-    const requests = await Maintenance.find().sort({ createdAt: -1 });
+    const requests = await Maintenance.find()
+      .populate('equipment', 'name serialNumber')
+      .populate('workCentre', 'name')
+      .populate('maintenanceTeam', 'name')
+      .populate('createdBy', 'name email')
+      .sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
     console.error('Error fetching requests:', error);
@@ -42,7 +47,11 @@ router.get('/all', async (req, res) => {
 // GET /maintenance/:id
 router.get('/:id', async (req, res) => {
   try {
-    const request = await Maintenance.findById(req.params.id);
+    const request = await Maintenance.findById(req.params.id)
+      .populate('equipment', 'name serialNumber')
+      .populate('workCentre', 'name')
+      .populate('maintenanceTeam', 'name')
+      .populate('createdBy', 'name email');
     if (!request) return res.status(404).json({ message: 'Request not found' });
     res.json(request);
   } catch (error) {
